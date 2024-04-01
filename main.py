@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     
     # 4. How many times did customers switch from a less expensive to a more expensive subscription?
-    # Assumpition: not counting prepaid-postpaid transition
+    # Assumpition: not counting prepaid-postpaid transition, can't be considered less expensive - more expensive subscription switch
     query = """
             SELECT 
             COUNT(*) as customer_count
