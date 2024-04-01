@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     
     # 4. How many times did customers switch from a less expensive to a more expensive subscription?
-    # Switch - +-the same date, not counting prepaid-postpaid transition
+    # Assumpition: not counting prepaid-postpaid transition
     query = """
             SELECT 
             COUNT(*) as customer_count
@@ -95,10 +95,11 @@ if __name__ == "__main__":
                 LEAD(rate) OVER (PARTITION BY  subscriber_id ORDER BY effective_date) as next_rate,
                 LEAD(effective_date) OVER (PARTITION BY subscriber_id ORDER BY effective_date) as next_eff_date
             FROM subscriptions) sub
+            left join priceplan pp
+            on sub.soc_pp_code = pp.soc_pp_code
             WHERE 1=1
             AND sub.next_rate > sub.rate 
-            AND julianday(sub.next_eff_date) -  julianday(sub.expiration_date) <=1
-            AND sub.rate != 0
+            AND pp.product_payment_type != 'Prepaid'
     """
     present("Subscription switch", query, conn)
 
@@ -133,6 +134,7 @@ if __name__ == "__main__":
                 *,
                 LAG(effective_date) OVER (PARTITION BY subscriber_id ORDER BY effective_date) as before_date
             FROM subscriptions ) sub
+            
         WHERE date(effective_date) = '2018-12-12'
         GROUP BY 
             CASE
@@ -165,16 +167,19 @@ if __name__ == "__main__":
                 GROUP BY 
                 strftime('%Y', effective_date),
                 strftime('%W', effective_date)) rate
+                
             LEFT JOIN subscriptions sub
             ON strftime('%Y', sub.effective_date) = rate.year
             AND strftime('%W', sub.effective_date)+1 = rate.week
             AND sub.rate = rate.max_rate
+            
             LEFT JOIN  priceplan pp
             ON pp.soc_pp_code = sub.soc_pp_code
+            
     """
     present("Weekly metrics", query, conn)
 
     
-    query = "select *, max(rate) from subscriptions"
-    present("", query, conn)
+
+
     
