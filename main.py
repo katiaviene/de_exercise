@@ -3,6 +3,10 @@ import sqlite3
 from tabulate import tabulate
 
 
+def init_db():
+    conn = sqlite3.connect(':memory:')
+    return conn
+
 
 def read_file(file):
     df = pd.read_csv(file)
@@ -11,11 +15,6 @@ def read_file(file):
 
 def write_data(df, connection, table):
     df.to_sql(table, connection, if_exists="replace", index=False)
-
-
-def init_db():
-    conn = sqlite3.connect(':memory:')
-    return conn
 
 
 def read_query(query, connection):
@@ -27,6 +26,7 @@ def present(title, query, conn):
     print(title)
     print(read_query(query, conn))
     input("")
+    
     
 if __name__ == "__main__":
     
