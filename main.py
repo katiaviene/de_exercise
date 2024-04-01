@@ -29,6 +29,7 @@ def present(title, query, conn):
     input("")
     
 if __name__ == "__main__":
+    
     conn = init_db()
     df = read_file("data\priceplan_hierarchy_anonymized.csv")
     write_data(df, conn, "priceplan")
@@ -174,5 +175,6 @@ if __name__ == "__main__":
     present("Weekly metrics", query, conn)
 
     
-    
+    query = "select *, max(rate) from subscriptions"
+    present("", query, conn)
     
